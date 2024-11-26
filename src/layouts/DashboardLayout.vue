@@ -1,57 +1,96 @@
 <template>
-  <el-container>
-    <el-aside width="200px">
-      <el-menu
-        :default-active="route.path"
-        class="dashboard-menu"
-        router
-      >
+  <div class="min-h-screen bg-gray-50">
+    <!-- 侧边栏 -->
+    <aside class="fixed inset-y-0 left-0 w-64 bg-gray-900 transition-transform duration-300 z-20">
+      <div class="flex h-16 items-center justify-center border-b border-gray-800">
+        <span class="text-xl font-bold text-white">后台管理</span>
+      </div>
+      
+      <nav class="mt-5 px-2 space-y-1">
         <template v-if="authStore.user?.role === 'merchant'">
-          <el-menu-item index="/merchant/products">
-            <el-icon><Document /></el-icon>
+          <router-link 
+            to="/merchant/products"
+            class="group flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors"
+            :class="{ 'bg-gray-800 text-white': route.path === '/merchant/products' }"
+          >
+            <el-icon class="mr-3 h-5 w-5"><Document /></el-icon>
             <span>商品管理</span>
-          </el-menu-item>
-          <el-menu-item index="/merchant/orders">
-            <el-icon><List /></el-icon>
+          </router-link>
+          
+          <router-link 
+            to="/merchant/orders"
+            class="group flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors"
+            :class="{ 'bg-gray-800 text-white': route.path === '/merchant/orders' }"
+          >
+            <el-icon class="mr-3 h-5 w-5"><List /></el-icon>
             <span>订单管理</span>
-          </el-menu-item>
+          </router-link>
         </template>
         
         <template v-if="authStore.user?.role === 'influencer'">
-          <el-menu-item index="/influencer/products">
-            <el-icon><ShoppingBag /></el-icon>
+          <router-link 
+            to="/influencer/products"
+            class="group flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors"
+            :class="{ 'bg-gray-800 text-white': route.path === '/influencer/products' }"
+          >
+            <el-icon class="mr-3 h-5 w-5"><ShoppingBag /></el-icon>
             <span>选品中心</span>
-          </el-menu-item>
-          <el-menu-item index="/influencer/orders">
-            <el-icon><List /></el-icon>
+          </router-link>
+          
+          <router-link 
+            to="/influencer/orders"
+            class="group flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors"
+            :class="{ 'bg-gray-800 text-white': route.path === '/influencer/orders' }"
+          >
+            <el-icon class="mr-3 h-5 w-5"><List /></el-icon>
             <span>订单记录</span>
-          </el-menu-item>
-          <el-menu-item index="/influencer/tiktok">
-            <el-icon><Link /></el-icon>
+          </router-link>
+          
+          <router-link 
+            to="/influencer/tiktok"
+            class="group flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors"
+            :class="{ 'bg-gray-800 text-white': route.path === '/influencer/tiktok' }"
+          >
+            <el-icon class="mr-3 h-5 w-5"><Link /></el-icon>
             <span>TikTok绑定</span>
-          </el-menu-item>
+          </router-link>
         </template>
-      </el-menu>
-    </el-aside>
-    
-    <el-container>
-      <el-header height="60px">
-        <div class="header-right">
-          <span>{{ authStore.user?.email }}</span>
-          <el-button type="text" @click="handleLogout">退出</el-button>
+      </nav>
+    </aside>
+
+    <!-- 主内容区 -->
+    <div class="pl-64">
+      <!-- 顶部导航栏 -->
+      <header class="h-16 bg-white shadow-sm fixed right-0 left-64 top-0 z-10">
+        <div class="h-full px-6 flex items-center justify-end">
+          <div class="flex items-center space-x-4">
+            <span class="text-gray-600">{{ authStore.user?.email }}</span>
+            <el-button 
+              type="danger" 
+              plain 
+              size="small"
+              @click="handleLogout"
+              class="hover:bg-red-50"
+            >
+              退出
+            </el-button>
+          </div>
         </div>
-      </el-header>
-      
-      <el-main>
-        <router-view></router-view>
-      </el-main>
-    </el-container>
-  </el-container>
+      </header>
+
+      <!-- 页面内容 -->
+      <main class="pt-16 p-6">
+        <div class="max-w-7xl mx-auto">
+          <router-view></router-view>
+        </div>
+      </main>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { useRouter, useRoute } from 'vue-router'
-import { Document, List, VideoPlay, Link } from '@element-plus/icons-vue'
+import { Document, List, VideoPlay, Link, ShoppingBag } from '@element-plus/icons-vue'
 import { useAuthStore } from '../stores/auth'
 
 const router = useRouter()
@@ -62,31 +101,4 @@ const handleLogout = () => {
   authStore.logout()
   router.push('/login')
 }
-</script>
-
-<style scoped>
-.el-aside {
-  background-color: #304156;
-  height: 100vh;
-}
-
-.dashboard-menu {
-  height: 100%;
-  border-right: none;
-}
-
-.el-header {
-  background-color: #fff;
-  border-bottom: 1px solid #dcdfe6;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding: 0 20px;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-</style> 
+</script> 

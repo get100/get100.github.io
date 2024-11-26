@@ -1,74 +1,102 @@
 <template>
-  <div class="products">
-    <el-page-header content="选品中心" />
-    
-    <div class="page-content">
-      <!-- 左侧类目树 -->
-      <div class="category-sidebar">
-        <el-card class="category-card">
-          <template #header>
-            <div class="card-header">
-              <span>商品类目</span>
-            </div>
-          </template>
-          <el-tree
-            :data="categories"
-            :props="defaultProps"
-            @node-click="handleCategoryClick"
-            default-expand-all
-          />
-        </el-card>
+  <div class="min-h-screen bg-gray-50 py-6">
+    <div class="max-w-[1600px] mx-auto px-4">
+      <!-- 页面标题 -->
+      <div class="mb-8">
+        <h1 class="text-2xl font-semibold text-gray-900">选品中心</h1>
+        <p class="mt-2 text-sm text-gray-600">浏览商品视频，一键分享获得佣金</p>
       </div>
 
-      <!-- 右侧商品列表 -->
-      <div class="products-content">
-        <div class="search-bar">
-          <el-input
-            v-model="searchQuery"
-            placeholder="搜索商品名称"
-            class="search-input"
-            clearable
-            @input="handleSearch"
-          >
-            <template #prefix>
-              <el-icon><Search /></el-icon>
-            </template>
-          </el-input>
+      <div class="flex gap-4">
+        <!-- 左侧类目树 -->
+        <div class="w-56 flex-shrink-0">
+          <div class="bg-white rounded-lg shadow-sm sticky top-24">
+            <div class="px-4 py-5 border-b border-gray-200">
+              <h3 class="text-lg font-medium text-gray-900">商品类目</h3>
+            </div>
+            <div class="p-4">
+              <el-tree
+                :data="categories"
+                :props="defaultProps"
+                @node-click="handleCategoryClick"
+                default-expand-all
+              />
+            </div>
+          </div>
         </div>
 
-        <div class="products-grid">
-          <el-row :gutter="20">
-            <el-col :span="6" v-for="product in filteredProducts" :key="product.id">
-              <el-card class="product-card">
-                <div class="product-cover">
-                  <img :src="product.image" :alt="product.title" class="image">
-                  <div class="video-overlay" @click="handlePreviewVideo(product)">
-                    <el-icon><VideoPlay /></el-icon>
-                  </div>
+        <!-- 右侧商品列表 -->
+        <div class="flex-1">
+          <!-- 搜索栏 -->
+          <div class="mb-6">
+            <div class="max-w-lg">
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <el-icon class="h-5 w-5 text-gray-400"><Search /></el-icon>
                 </div>
-                <div class="product-info">
-                  <h3 class="product-title">{{ product.title }}</h3>
-                  <div class="product-price">
-                    <span class="price">¥{{ product.price }}</span>
-                    <span class="commission">佣金: {{ product.commission }}%</span>
-                  </div>
-                  <div class="action-buttons">
-                    <el-button type="primary" size="small" @click="handleDownload(product)">
-                      <el-icon><Download /></el-icon>下载视频
-                    </el-button>
-                    <el-button type="success" size="small" @click="handleShare(product)">
-                      <el-icon><Share /></el-icon>分享到TikTok
-                    </el-button>
-                  </div>
+                <input
+                  type="text"
+                  v-model="searchQuery"
+                  class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                  placeholder="搜索商品名称"
+                  @input="handleSearch"
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- 商品网格 -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div v-for="product in filteredProducts" :key="product.id" 
+                 class="bg-white overflow-hidden shadow-sm rounded-lg">
+              <!-- 商品图片部分 -->
+              <div class="relative pt-[100%]">
+                <img 
+                  :src="product.image" 
+                  :alt="product.title"
+                  class="absolute inset-0 w-full h-full object-cover"
+                >
+                <div 
+                  class="absolute inset-0 bg-black bg-opacity-30 opacity-0 hover:opacity-100 transition-opacity duration-200 flex items-center justify-center cursor-pointer"
+                  @click="handlePreviewVideo(product)"
+                >
+                  <el-icon class="text-white text-4xl"><VideoPlay /></el-icon>
                 </div>
-              </el-card>
-            </el-col>
-          </el-row>
+              </div>
+
+              <!-- 商品信息部分 -->
+              <div class="p-4">
+                <h3 class="text-base font-medium text-gray-900 mb-2 line-clamp-2 min-h-[3rem]">
+                  {{ product.title }}
+                </h3>
+                <div class="flex items-center justify-between mb-4">
+                  <span class="text-lg font-bold text-primary-600">¥{{ product.price }}</span>
+                  <span class="text-sm font-medium text-green-600">佣金 {{ product.commission }}%</span>
+                </div>
+                <div class="space-y-2">
+                  <button
+                    @click="handleDownload(product)"
+                    class="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                  >
+                    <el-icon class="mr-2 -ml-1 h-4 w-4"><Download /></el-icon>
+                    下载视频
+                  </button>
+                  <button
+                    @click="handleShare(product)"
+                    class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                  >
+                    <el-icon class="mr-2 -ml-1 h-4 w-4"><Share /></el-icon>
+                    分享到TikTok
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- 视频预览对话框 -->
+    <!-- 弹窗部分保持不变 -->
     <el-dialog
       v-model="previewVisible"
       title="视频预览"
@@ -79,7 +107,7 @@
         v-if="currentProduct?.video"
         :src="currentProduct.video"
         controls
-        style="width: 100%"
+        class="w-full"
       ></video>
     </el-dialog>
 
@@ -95,43 +123,74 @@
       <TikTok @bind-success="handleTikTokBindSuccess" />
     </el-dialog>
 
-    <!-- 添加分享引导弹窗 -->
+    <!-- 分享引导弹窗 -->
     <el-dialog
       v-model="shareGuideVisible"
       title="分享到TikTok"
       width="500px"
     >
-      <div class="share-guide">
-        <el-steps :active="activeStep" finish-status="success">
+      <div class="py-6">
+        <el-steps :active="activeStep" finish-status="success" class="mb-8">
           <el-step title="步骤1" description="扫描二维码" />
           <el-step title="步骤2" description="添加到橱窗" />
           <el-step title="步骤3" description="分享视频" />
         </el-steps>
 
-        <div class="step-content" v-if="activeStep === 0">
-          <div class="qrcode-container">
-            <img :src="currentProduct?.qrcode || '/images/mock-qrcode.png'" alt="商品二维码" class="qrcode" />
+        <div v-if="activeStep === 0" class="text-center">
+          <div class="mb-6">
+            <img :src="currentProduct?.qrcode || '/images/mock-qrcode.png'" alt="商品二维码" class="mx-auto w-48 h-48">
           </div>
-          <p class="guide-text">请使用TikTok App扫描上方二维码，将商品添加到您的橱窗中</p>
+          <p class="text-gray-600 mb-6">请使用TikTok App扫描上方二维码，将商品添加到您的橱窗中</p>
           <el-button type="primary" @click="activeStep++">已添加到橱窗，下一步</el-button>
         </div>
 
-        <div class="step-content" v-if="activeStep === 1">
-          <p class="guide-text">点击下方按钮，将视频分享到TikTok</p>
+        <div v-if="activeStep === 1" class="text-center">
+          <p class="text-gray-600 mb-6">点击下方按钮，将视频分享到TikTok</p>
           <el-button type="primary" @click="handleShareToTikTok">
-            <el-icon><Share /></el-icon>分享视频到TikTok
+            <el-icon class="mr-2"><Share /></el-icon>分享视频到TikTok
           </el-button>
         </div>
 
-        <div class="step-content" v-if="activeStep === 2">
-          <p class="guide-text">请在TikTok发布页面中：</p>
-          <ol class="guide-list">
-            <li>点击"添加商品"</li>
-            <li>从橱窗中选择刚才添加的商品</li>
-            <li>将商品标签拖动到合适的位置</li>
-            <li>完成视频发布</li>
+        <div v-if="activeStep === 2" class="text-center">
+          <p class="text-gray-600 mb-4">请在TikTok发布页面中：</p>
+          <ol class="text-left text-gray-600 space-y-2 mb-6">
+            <li>1. 点击"添加商品"</li>
+            <li>2. 从橱窗中选择刚才添加的商品</li>
+            <li>3. 将商品标签拖动到合适的位置</li>
+            <li>4. 完成视频发布</li>
           </ol>
           <el-button type="primary" @click="completeShare">完成</el-button>
+        </div>
+      </div>
+    </el-dialog>
+
+    <!-- 下载引导弹窗 -->
+    <el-dialog
+      v-model="downloadGuideVisible"
+      title="下载视频"
+      width="500px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+    >
+      <div class="py-6">
+        <el-steps :active="downloadStep" finish-status="success" class="mb-8">
+          <el-step title="步骤1" description="添加到橱窗" />
+          <el-step title="步骤2" description="下载视频" />
+        </el-steps>
+
+        <div v-if="downloadStep === 0" class="text-center">
+          <div class="mb-6">
+            <img :src="currentProduct?.qrcode || '/images/mock-qrcode.png'" alt="商品二维码" class="mx-auto w-48 h-48">
+          </div>
+          <p class="text-gray-600 mb-6">请使用TikTok App扫描上方二维码，将商品添加到您的橱窗中</p>
+          <el-button type="primary" @click="downloadStep++">已添加到橱窗，下一步</el-button>
+        </div>
+
+        <div v-if="downloadStep === 1" class="text-center">
+          <p class="text-gray-600 mb-6">商品已添加到橱窗，现在您可以下载视频了</p>
+          <el-button type="primary" @click="handleDownloadVideo">
+            <el-icon class="mr-2"><Download /></el-icon>下载视频
+          </el-button>
         </div>
       </div>
     </el-dialog>
@@ -308,7 +367,7 @@ const products = ref<Product[]>([
   },
   {
     id: 12,
-    title: '护发精油套装',
+    title: '护发精套装',
     price: 259,
     commission: 30,
     category: '个人护理',
@@ -416,7 +475,9 @@ const handlePreviewVideo = (product: Product) => {
 }
 
 const handleDownload = (product: Product) => {
-  ElMessage.success('开始下载视频')
+  currentProduct.value = product
+  downloadGuideVisible.value = true
+  downloadStep.value = 0
 }
 
 const authStore = useAuthStore()
@@ -454,159 +515,19 @@ const completeShare = () => {
   activeStep.value = 0
   ElMessage.success('分享完成')
 }
-</script>
 
-<style scoped>
-.products {
-  padding: 20px;
-}
+// 添加下载相关的状态
+const downloadGuideVisible = ref(false)
+const downloadStep = ref(0)
 
-.page-content {
-  display: flex;
-  gap: 20px;
-  margin-top: 20px;
+// 添加实际下载视频的处理函数
+const handleDownloadVideo = () => {
+  // 这里实现实际的视频下载逻辑
+  ElMessage.success('开始下载视频')
+  // 下载完成后关闭弹窗
+  setTimeout(() => {
+    downloadGuideVisible.value = false
+    downloadStep.value = 0
+  }, 1000)
 }
-
-.category-sidebar {
-  width: 240px;
-  flex-shrink: 0;
-}
-
-.category-card {
-  position: sticky;
-  top: 20px;
-}
-
-.products-content {
-  flex: 1;
-}
-
-.search-bar {
-  margin-bottom: 20px;
-}
-
-.search-input {
-  max-width: 400px;
-}
-
-.product-card {
-  margin-bottom: 20px;
-}
-
-.product-cover {
-  position: relative;
-  height: 300px;
-  overflow: hidden;
-}
-
-.image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.video-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.video-overlay:hover {
-  opacity: 1;
-}
-
-.video-overlay .el-icon {
-  font-size: 48px;
-  color: white;
-}
-
-.product-info {
-  padding: 14px;
-}
-
-.product-title {
-  margin: 0 0 10px;
-  font-size: 16px;
-  font-weight: normal;
-  color: #303133;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-}
-
-.product-price {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.price {
-  color: #f56c6c;
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.commission {
-  color: #67c23a;
-  font-size: 14px;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-.action-buttons .el-button {
-  flex: 1;
-}
-
-.share-guide {
-  padding: 20px 0;
-}
-
-.step-content {
-  margin-top: 40px;
-  text-align: center;
-}
-
-.qrcode-container {
-  display: flex;
-  justify-content: center;
-  margin: 20px 0;
-}
-
-.qrcode {
-  width: 200px;
-  height: 200px;
-  object-fit: contain;
-}
-
-.guide-text {
-  margin: 20px 0;
-  color: #606266;
-  font-size: 16px;
-}
-
-.guide-list {
-  text-align: left;
-  margin: 20px 0;
-  padding-left: 20px;
-  color: #606266;
-  line-height: 1.8;
-}
-
-.el-button {
-  margin-top: 20px;
-}
-</style> 
+</script> 

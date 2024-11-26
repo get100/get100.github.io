@@ -1,27 +1,66 @@
 <template>
-  <div class="products">
-    <el-page-header content="商品管理" />
-    <div class="content">
-      <el-button type="primary" @click="handleAdd">添加商品</el-button>
-      <el-table :data="products" style="width: 100%; margin-top: 20px;">
-        <el-table-column prop="name" label="商品名称" />
-        <el-table-column prop="price" label="售价">
-          <template #default="scope">
-            ¥{{ scope.row.price }}
-          </template>
-        </el-table-column>
-        <el-table-column prop="commission" label="佣金比例">
-          <template #default="scope">
-            {{ (scope.row.commission * 100).toFixed(0) }}%
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="150">
-          <template #default="scope">
-            <el-button type="primary" link @click="handleEdit(scope.row)">编辑</el-button>
-            <el-button type="danger" link @click="handleDelete(scope.row)">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+  <div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- 页面标题 -->
+      <div class="mb-8">
+        <h1 class="text-2xl font-semibold text-gray-900">商品管理</h1>
+        <p class="mt-2 text-sm text-gray-600">管理您的商品信息和视频内容</p>
+      </div>
+
+      <!-- 操作栏 -->
+      <div class="mb-6">
+        <button
+          @click="handleAdd"
+          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+        >
+          <el-icon class="mr-2 -ml-1 h-5 w-5"><Plus /></el-icon>
+          添加商品
+        </button>
+      </div>
+
+      <!-- 商品列表 -->
+      <div class="bg-white shadow overflow-hidden sm:rounded-md">
+        <ul class="divide-y divide-gray-200">
+          <li v-for="product in products" :key="product.id" class="px-6 py-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="flex-shrink-0 h-16 w-16">
+                  <img 
+                    :src="product.image || 'https://via.placeholder.com/150'" 
+                    class="h-16 w-16 rounded-lg object-cover"
+                    alt="商品图片"
+                  >
+                </div>
+                <div class="ml-4">
+                  <div class="text-lg font-medium text-gray-900">{{ product.name }}</div>
+                  <div class="mt-1 flex items-center">
+                    <span class="text-sm text-gray-500 mr-4">售价：</span>
+                    <span class="text-lg font-semibold text-primary-600">¥{{ product.price }}</span>
+                  </div>
+                  <div class="mt-1 flex items-center">
+                    <span class="text-sm text-gray-500 mr-4">佣金比例：</span>
+                    <span class="text-sm font-medium text-green-600">{{ (product.commission * 100).toFixed(0) }}%</span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center space-x-4">
+                <button
+                  @click="handleEdit(product)"
+                  class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                >
+                  编辑
+                </button>
+                <button
+                  @click="handleDelete(product)"
+                  class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                >
+                  删除
+                </button>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
     </div>
 
     <!-- 商品编辑对话框 -->
@@ -29,27 +68,39 @@
       v-model="dialogVisible"
       :title="isEdit ? '编辑商品' : '添加商品'"
       width="600px"
+      class="!bg-white"
+      destroy-on-close
     >
       <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
         <el-form-item label="商品名称" prop="name">
           <el-input v-model="form.name" placeholder="请输入商品名称" />
         </el-form-item>
+        
         <el-form-item label="商品主图" prop="image">
-          <el-upload
-            class="avatar-uploader"
-            action="#"
-            :show-file-list="false"
-            :before-upload="beforeImageUpload"
-          >
-            <img v-if="form.image" :src="form.image" class="avatar" />
-            <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
-          </el-upload>
+          <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+            <div class="space-y-1 text-center">
+              <div v-if="!form.image" class="flex flex-col items-center">
+                <el-icon class="mx-auto h-12 w-12 text-gray-400"><Plus /></el-icon>
+                <div class="flex text-sm text-gray-600">
+                  <label
+                    class="relative cursor-pointer rounded-md font-medium text-primary-600 hover:text-primary-500"
+                  >
+                    <span>上传图片</span>
+                    <input type="file" class="sr-only" @change="handleImageUpload">
+                  </label>
+                </div>
+              </div>
+              <img v-else :src="form.image" class="max-h-48 rounded-md">
+            </div>
+          </div>
         </el-form-item>
+
         <el-form-item label="售价" prop="price">
           <el-input-number v-model="form.price" :precision="2" :step="0.1" :min="0" />
         </el-form-item>
+
         <el-form-item label="佣金比例" prop="commission">
-          <div class="commission-input">
+          <div class="flex items-center">
             <el-input-number
               v-model="form.commission"
               :min="1"
@@ -57,84 +108,79 @@
               :precision="0"
               :step="1"
               controls-position="right"
-              style="width: 160px"
+              class="w-40"
             />
-            <span class="commission-suffix">%</span>
+            <span class="ml-2 text-gray-500">%</span>
           </div>
         </el-form-item>
+
         <el-form-item label="商品链接" prop="link">
           <el-input v-model="form.link" placeholder="请输入商品链接" />
         </el-form-item>
+
         <el-form-item label="商品视频" prop="video">
-          <el-upload
-            class="video-uploader"
-            action="#"
-            :show-file-list="true"
-            :before-upload="beforeVideoUpload"
-            accept="video/*"
-            :limit="1"
-          >
-            <el-button type="primary">
-              <el-icon><Upload /></el-icon>
-              <span>上传视频</span>
-            </el-button>
-            <template #tip>
-              <div class="upload-tip">支持mp4、mov格式，大小不超过100MB</div>
-            </template>
-          </el-upload>
+          <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+            <div class="space-y-1 text-center">
+              <div v-if="!form.video" class="flex flex-col items-center">
+                <el-icon class="mx-auto h-12 w-12 text-gray-400"><VideoCamera /></el-icon>
+                <div class="flex text-sm text-gray-600">
+                  <label
+                    class="relative cursor-pointer rounded-md font-medium text-primary-600 hover:text-primary-500"
+                  >
+                    <span>上传视频</span>
+                    <input type="file" class="sr-only" accept="video/*" @change="handleVideoUpload">
+                  </label>
+                </div>
+                <p class="text-xs text-gray-500">支持mp4、mov格式，大小不超过100MB</p>
+              </div>
+              <div v-else class="text-sm text-gray-900">
+                已上传视频
+                <el-button type="text" @click="form.video = ''">重新上传</el-button>
+              </div>
+            </div>
+          </div>
         </el-form-item>
 
         <el-form-item label="授权协议" prop="agreement">
-          <el-upload
-            class="agreement-uploader"
-            action="#"
-            :show-file-list="true"
-            :before-upload="beforeAgreementUpload"
-            :limit="1"
-            accept=".pdf,.doc,.docx"
-          >
-            <el-button type="primary">
-              <el-icon><Upload /></el-icon>
-              <span>上传协议文件</span>
-            </el-button>
-            <template #tip>
-              <div class="upload-tip">支持PDF、Word格式，大小不超过10MB</div>
-            </template>
-          </el-upload>
+          <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+            <div class="space-y-1 text-center">
+              <div v-if="!form.agreement" class="flex flex-col items-center">
+                <el-icon class="mx-auto h-12 w-12 text-gray-400"><Document /></el-icon>
+                <div class="flex text-sm text-gray-600">
+                  <label
+                    class="relative cursor-pointer rounded-md font-medium text-primary-600 hover:text-primary-500"
+                  >
+                    <span>上传协议</span>
+                    <input type="file" class="sr-only" accept=".pdf,.doc,.docx" @change="handleAgreementUpload">
+                  </label>
+                </div>
+                <p class="text-xs text-gray-500">支持PDF、Word格式，大小不超过10MB</p>
+              </div>
+              <div v-else class="text-sm text-gray-900">
+                已上传协议：{{ form.agreement }}
+                <el-button type="text" @click="form.agreement = ''">重新上传</el-button>
+              </div>
+            </div>
+          </div>
         </el-form-item>
       </el-form>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="dialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="handleSave" :loading="loading">
-            确定
-          </el-button>
-        </span>
-      </template>
-    </el-dialog>
 
-    <!-- 视频上传对话框 -->
-    <el-dialog
-      v-model="videoDialogVisible"
-      title="上传商品视频"
-      width="500px"
-    >
-      <el-upload
-        class="video-uploader"
-        action="#"
-        :show-file-list="false"
-        :before-upload="beforeVideoUpload"
-      >
-        <video v-if="currentVideo" :src="currentVideo" class="video-preview" controls />
-        <el-icon v-else class="video-uploader-icon"><VideoCamera /></el-icon>
-      </el-upload>
       <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="videoDialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="handleVideoSave" :loading="videoLoading">
-            确定
-          </el-button>
-        </span>
+        <div class="flex justify-end space-x-3">
+          <button
+            @click="dialogVisible = false"
+            class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+          >
+            取消
+          </button>
+          <button
+            @click="handleSave"
+            :disabled="loading"
+            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
+          >
+            {{ loading ? '保存中...' : '确定' }}
+          </button>
+        </div>
       </template>
     </el-dialog>
   </div>
@@ -144,7 +190,7 @@
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance } from 'element-plus'
-import { Plus, VideoCamera, Upload } from '@element-plus/icons-vue'
+import { Plus, VideoCamera, Upload, Document } from '@element-plus/icons-vue'
 
 interface Product {
   id: number
@@ -261,88 +307,41 @@ const handleDelete = (row: Product) => {
   products.value = products.value.filter(p => p.id !== row.id)
 }
 
-const beforeImageUpload = (file: File) => {
-  // 模拟图片上传
+const handleImageUpload = (event: Event) => {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+
   const reader = new FileReader()
   reader.readAsDataURL(file)
   reader.onload = () => {
     form.value.image = reader.result as string
   }
-  return false
 }
 
-const handleUploadVideo = (row: Product) => {
-  currentProduct.value = row
-  currentVideo.value = ''
-  videoDialogVisible.value = true
-}
+const handleVideoUpload = (event: Event) => {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
 
-const beforeVideoUpload = (file: File) => {
-  const isValidFormat = ['video/mp4', 'video/quicktime'].includes(file.type)
-  const isLt100M = file.size / 1024 / 1024 < 100
-
-  if (!isValidFormat) {
-    ElMessage.error('视频格式不正确！')
-    return false
-  }
-  if (!isLt100M) {
-    ElMessage.error('视频大小不能超过 100MB!')
-    return false
-  }
-
-  // 模拟视频上传
   const reader = new FileReader()
   reader.readAsDataURL(file)
   reader.onload = () => {
     form.value.video = reader.result as string
   }
-  return false
 }
 
-const handleVideoSave = () => {
-  if (!currentVideo.value) {
-    ElMessage.warning('请先上传视频')
-    return
-  }
-  
-  videoLoading.value = true
-  // 模拟保存视频
-  setTimeout(() => {
-    ElMessage.success('视频上传成功')
-    videoDialogVisible.value = false
-    videoLoading.value = false
-  }, 1000)
-}
+const handleAgreementUpload = (event: Event) => {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
 
-const beforeAgreementUpload = (file: File) => {
-  const isValidFormat = [
-    'application/pdf',
-    'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-  ].includes(file.type)
-  const isLt10M = file.size / 1024 / 1024 < 10
-
-  if (!isValidFormat) {
-    ElMessage.error('文件格式不正确！')
-    return false
-  }
-  if (!isLt10M) {
-    ElMessage.error('文件大小不能超过 10MB!')
-    return false
-  }
-
-  // 模拟文件上传
   const reader = new FileReader()
   reader.readAsDataURL(file)
   reader.onload = () => {
     form.value.agreement = file.name
     ElMessage.success('协议文件上传成功')
   }
-  return false
-}
-
-const formatTooltip = (val: number): string => {
-  return val + '%'
 }
 </script>
 
