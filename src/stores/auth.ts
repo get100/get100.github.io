@@ -4,15 +4,22 @@ interface UserState {
   user: {
     email: string
     role: 'merchant' | 'influencer'
+    tiktokBound: boolean
   } | null
   token: string | null
 }
 
 export const useAuthStore = defineStore('auth', {
-  state: (): UserState => ({
-    user: null,
-    token: null
-  }),
+  state: (): UserState => {
+    const savedState = localStorage.getItem('auth')
+    if (savedState) {
+      return JSON.parse(savedState)
+    }
+    return {
+      user: null,
+      token: null
+    }
+  },
   
   getters: {
     isLoggedIn: (state) => !!state.token
@@ -21,13 +28,23 @@ export const useAuthStore = defineStore('auth', {
   actions: {
     login(email: string, password: string) {
       if (email === '123@qq.com' && password === '123456') {
-        this.user = { email, role: 'influencer' }
+        this.user = { 
+          email, 
+          role: 'influencer',
+          tiktokBound: false
+        }
         this.token = 'mock_token'
+        this.saveState()
         return true
       }
       if (email === '456@qq.com' && password === '123456') {
-        this.user = { email, role: 'merchant' }
+        this.user = { 
+          email, 
+          role: 'merchant',
+          tiktokBound: false
+        }
         this.token = 'mock_token'
+        this.saveState()
         return true
       }
       return false
@@ -36,6 +53,21 @@ export const useAuthStore = defineStore('auth', {
     logout() {
       this.user = null
       this.token = null
+      localStorage.removeItem('auth')
+    },
+
+    bindTikTok() {
+      if (this.user) {
+        this.user.tiktokBound = true
+        this.saveState()
+      }
+    },
+
+    saveState() {
+      localStorage.setItem('auth', JSON.stringify({
+        user: this.user,
+        token: this.token
+      }))
     }
   }
 }) 

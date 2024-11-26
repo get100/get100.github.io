@@ -82,6 +82,59 @@
         style="width: 100%"
       ></video>
     </el-dialog>
+
+    <!-- TikTok 绑定弹窗 -->
+    <el-dialog
+      v-model="tikTokBindVisible"
+      title="绑定TikTok账号"
+      width="500px"
+      :destroy-on-close="true"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+    >
+      <TikTok @bind-success="handleTikTokBindSuccess" />
+    </el-dialog>
+
+    <!-- 添加分享引导弹窗 -->
+    <el-dialog
+      v-model="shareGuideVisible"
+      title="分享到TikTok"
+      width="500px"
+    >
+      <div class="share-guide">
+        <el-steps :active="activeStep" finish-status="success">
+          <el-step title="步骤1" description="扫描二维码" />
+          <el-step title="步骤2" description="添加到橱窗" />
+          <el-step title="步骤3" description="分享视频" />
+        </el-steps>
+
+        <div class="step-content" v-if="activeStep === 0">
+          <div class="qrcode-container">
+            <img :src="currentProduct?.qrcode || '/images/mock-qrcode.png'" alt="商品二维码" class="qrcode" />
+          </div>
+          <p class="guide-text">请使用TikTok App扫描上方二维码，将商品添加到您的橱窗中</p>
+          <el-button type="primary" @click="activeStep++">已添加到橱窗，下一步</el-button>
+        </div>
+
+        <div class="step-content" v-if="activeStep === 1">
+          <p class="guide-text">点击下方按钮，将视频分享到TikTok</p>
+          <el-button type="primary" @click="handleShareToTikTok">
+            <el-icon><Share /></el-icon>分享视频到TikTok
+          </el-button>
+        </div>
+
+        <div class="step-content" v-if="activeStep === 2">
+          <p class="guide-text">请在TikTok发布页面中：</p>
+          <ol class="guide-list">
+            <li>点击"添加商品"</li>
+            <li>从橱窗中选择刚才添加的商品</li>
+            <li>将商品标签拖动到合适的位置</li>
+            <li>完成视频发布</li>
+          </ol>
+          <el-button type="primary" @click="completeShare">完成</el-button>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -89,6 +142,8 @@
 import { ref, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, VideoPlay, Download, Share } from '@element-plus/icons-vue'
+import { useAuthStore } from '../../stores/auth'
+import TikTok from '../influencer/TikTok.vue'
 
 interface Product {
   id: number
@@ -364,8 +419,40 @@ const handleDownload = (product: Product) => {
   ElMessage.success('开始下载视频')
 }
 
+const authStore = useAuthStore()
+const tikTokBindVisible = ref(false)
+const shareGuideVisible = ref(false)
+const activeStep = ref(0)
+
+const handleTikTokBindSuccess = () => {
+  tikTokBindVisible.value = false
+  shareGuideVisible.value = true
+  activeStep.value = 0
+}
+
 const handleShare = (product: Product) => {
-  ElMessage.success('正在跳转到TikTok分享')
+  currentProduct.value = product
+  
+  if (!authStore.user?.tiktokBound) {
+    tikTokBindVisible.value = true
+  } else {
+    shareGuideVisible.value = true
+    activeStep.value = 0
+  }
+}
+
+const handleShareToTikTok = () => {
+  // 模拟分享到TikTok的操作
+  setTimeout(() => {
+    ElMessage.success('视频已成功导入TikTok')
+    activeStep.value++
+  }, 1000)
+}
+
+const completeShare = () => {
+  shareGuideVisible.value = false
+  activeStep.value = 0
+  ElMessage.success('分享完成')
 }
 </script>
 
@@ -482,5 +569,44 @@ const handleShare = (product: Product) => {
 
 .action-buttons .el-button {
   flex: 1;
+}
+
+.share-guide {
+  padding: 20px 0;
+}
+
+.step-content {
+  margin-top: 40px;
+  text-align: center;
+}
+
+.qrcode-container {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.qrcode {
+  width: 200px;
+  height: 200px;
+  object-fit: contain;
+}
+
+.guide-text {
+  margin: 20px 0;
+  color: #606266;
+  font-size: 16px;
+}
+
+.guide-list {
+  text-align: left;
+  margin: 20px 0;
+  padding-left: 20px;
+  color: #606266;
+  line-height: 1.8;
+}
+
+.el-button {
+  margin-top: 20px;
 }
 </style> 

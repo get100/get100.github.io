@@ -43,8 +43,12 @@
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Link } from '@element-plus/icons-vue'
+import { useAuthStore } from '../../stores/auth'
 
-const isBound = ref(false)
+const authStore = useAuthStore()
+const emit = defineEmits(['bind-success'])
+
+const isBound = ref(authStore.user?.tiktokBound || false)
 const account = ref({
   username: '@example_user',
   followers: '1000'
@@ -53,8 +57,10 @@ const account = ref({
 const handleBind = () => {
   // 模拟绑定过程
   setTimeout(() => {
+    authStore.bindTikTok()
     isBound.value = true
     ElMessage.success('绑定成功')
+    emit('bind-success')
   }, 1000)
 }
 
